@@ -15,6 +15,7 @@ from datetime import datetime
 from dataclasses import dataclass
 from typing import Callable, Union
 from .huggingface.hf import HFInference
+from .vllm.vllm_client import post_http_request, get_streaming_response, get_new_part
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -25,9 +26,11 @@ class ProviderDetails:
     Args:
         api_key (str): API key for provider
         version_key (str): version key for provider
+        infer_url (str): infer url 0f models in vllm
     '''
     api_key: str
     version_key: str
+    infer_url: str
 
 @dataclass
 class InferenceRequest:
@@ -127,8 +130,8 @@ class InferenceAnnouncer:
             data = json.loads(message['data'])
             uuid = data['uuid']
             logger.info(f"Received cancel message for uuid: {uuid}")
-            self.cancel_cache[uuid] = True      
-   
+            self.cancel_cache[uuid] = True
+
 class InferenceManager:
     def __init__(self, sse_topic):
         self.announcer = InferenceAnnouncer(sse_topic)
@@ -666,6 +669,37 @@ class InferenceManager:
 
     def aleph_alpha_text_generation(self, provider_details: ProviderDetails, inference_request: InferenceRequest):
         self.__error_handler__(self.__aleph_alpha_text_generation__, provider_details, inference_request)
-    
+
+    def __vllm_text_generation__(self, provider_details: ProviderDetails, inference_request: InferenceRequest):
+        api_url = f"http://{provider_details.infer_url}/generate"
+        params = inference_request.model_parameters
+        max_tokens = params['maximumLength'] if 'maximumLength' in params else 16
+        temperature = params['temperature'] if 'temperature' in params else 0.2
+        stop_words = params['stopSequences'] if 'stopSequences' in params else None
+        response = post_http_request(inference_request.prompt, api_url, 1, True, max_tokens, temperature, stop_words)
+        logger.info(f"vllm infer url:{provider_details.infer_url} temperature:{temperature} max_tokens:{max_tokens}")
+        cancelled = False
+        pre_line = ""
+        for output in get_streaming_response(response):
+            for i, line in enumerate(output):
+                if cancelled:
+                    break
+                infer_response = InferenceResult(
+                    uuid=inference_request.uuid,
+                    model_name=inference_request.model_name,
+                    model_tag=inference_request.model_tag,
+                    model_provider=inference_request.model_provider,
+                    token=get_new_part(pre_line, line),
+                    probability=None,
+                    top_n_distribution=None
+                )
+                pre_line = line
+                if not self.announcer.announce(infer_response, event="infer"):
+                    cancelled = True
+                    logger.info(f"Cancelled inference for {inference_request.uuid} - {inference_request.model_name}")
+
+    def vllm_text_generation(self, provider_details: ProviderDetails, inference_request: InferenceRequest):
+        self.__error_handler__(self.__vllm_text_generation__, provider_details, inference_request)
+
     def get_announcer(self):
-        return self.announcer 
+        return self.announcer

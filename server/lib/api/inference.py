@@ -16,9 +16,11 @@ logger.setLevel(logging.INFO)
 
 inference_bp = Blueprint('inference', __name__, url_prefix='/inference')
 
+
 @inference_bp.before_app_request
 def set_app_context():
     g.app = current_app
+
 
 @inference_bp.route("/text/stream", methods=["POST"])
 def stream_inference():
@@ -34,8 +36,9 @@ def stream_inference():
     request_uuid = "1"
     prompt = data['prompt']
     models = data['models']
-    
-    all_tasks = [task for task in (create_inference_request(model, storage, prompt, request_uuid) for model in models) if task is not None]
+
+    all_tasks = [task for task in (create_inference_request(model, storage, prompt, request_uuid) for model in models)
+                 if task is not None]
 
     if not all_tasks:
         return create_response_message("Invalid Request", 400)
@@ -45,8 +48,10 @@ def stream_inference():
 
     return stream_response(global_state, request_uuid)
 
+
 def is_valid_request_data(data):
     return isinstance(data['prompt'], str) and isinstance(data['models'], list)
+
 
 def create_inference_request(model, storage, prompt, request_uuid):
     model_name, provider_name, model_tag, parameters = extract_model_data(model)
@@ -54,16 +59,18 @@ def create_inference_request(model, storage, prompt, request_uuid):
     provider = next((provider for provider in storage.get_providers() if provider.name == provider_name), None)
     if provider is None or not provider.has_model(model_name):
         return None
-    
+
     if validate_parameters(provider.get_model(model_name), parameters):
         return InferenceRequest(uuid=request_uuid, model_name=model_name, model_tag=model_tag,
-            model_provider=provider_name, model_parameters=parameters, prompt=prompt
-        )
+                                model_provider=provider_name, model_parameters=parameters, prompt=prompt
+                                )
 
     return None
 
+
 def extract_model_data(model):
-    return model['name'],  model['provider'], model['tag'], model['parameters']
+    return model['name'], model['provider'], model['tag'], model['parameters']
+
 
 def validate_parameters(model, parameters):
     default_parameters = model.parameters
@@ -78,6 +85,7 @@ def validate_parameters(model, parameters):
             if value < parameter_range[0] or value > parameter_range[1]:
                 return False
     return True
+
 
 def stream_response(global_state, uuid):
     @stream_with_context
@@ -97,6 +105,7 @@ def stream_response(global_state, uuid):
             SSE_MANAGER.publish("inferences", message=json.dumps({"uuid": uuid}))
 
     return Response(stream_with_context(generator()), mimetype='text/event-stream')
+
 
 def bulk_completions(global_state, tasks: List[InferenceRequest]):
     time.sleep(1)
@@ -119,6 +128,7 @@ def bulk_completions(global_state, tasks: List[InferenceRequest]):
         probability=None,
         top_n_distribution=None
     ), event="done")
+
 
 def split_tasks_by_provider(tasks: List[InferenceRequest]) -> Tuple[List[InferenceRequest], List[InferenceRequest]]:
     local_tasks, remote_tasks = [], []

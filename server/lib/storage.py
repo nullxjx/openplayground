@@ -45,7 +45,8 @@ class Storage:
                     capabilities=model.get("capabilities", []),
                     enabled=model.get("enabled", False),
                     status=model.get("status", "ready"),
-                    parameters=model.get("parameters", {})
+                    parameters=model.get("parameters", {}),
+                    infer_url=model.get("infer_url", "")
                 )
                 for model_name, model in provider['models'].items()
             ]
@@ -117,7 +118,7 @@ class Storage:
 
                     for missing_original_key in missing_original_keys:
                         cached_models_json[cached_provider][missing_original_key] = \
-                        original_models_json[cached_provider][missing_original_key]
+                            original_models_json[cached_provider][missing_original_key]
 
                     cached_provider_models = cached_models_json[cached_provider]['models'].keys()
                     original_provider_models = original_models_json[cached_provider]['models'].keys()
@@ -132,7 +133,7 @@ class Storage:
                         for original_model_key in original_model_keys:
                             if original_model_key not in cached_model_keys:
                                 cached_models_json[cached_provider]['models'][cached_model][original_model_key] = \
-                                original_models_json[cached_provider]['models'][cached_model][original_model_key]
+                                    original_models_json[cached_provider]['models'][cached_model][original_model_key]
 
         with open(models_json_path, 'r') as f:
             return json.load(f), models_json_path
@@ -172,6 +173,16 @@ class Storage:
                 if provider.name == provider_name
             ),
             None,
+        )
+
+    def get_infer_url(self, provider_name: str, model_name: str) -> str:
+        return next(
+            (
+                model.infer_url
+                for model in self.models
+                if model.name == model_name and model.provider == provider_name
+            ),
+            ""
         )
 
     def update_provider_api_key(self, provider_name: str, api_key: str):
