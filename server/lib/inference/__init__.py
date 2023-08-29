@@ -27,10 +27,12 @@ class ProviderDetails:
         api_key (str): API key for provider
         version_key (str): version key for provider
         infer_url (str): infer url 0f models in vllm
+        cut (bool): required by some models like llama
     '''
     api_key: str
     version_key: str
     infer_url: str
+    cut: bool
 
 @dataclass
 class InferenceRequest:
@@ -672,15 +674,19 @@ class InferenceManager:
 
     def __vllm_text_generation__(self, provider_details: ProviderDetails, inference_request: InferenceRequest):
         api_url = f"http://{provider_details.infer_url}/generate"
+        prompt = inference_request.prompt
         params = inference_request.model_parameters
         max_tokens = params['maximumLength'] if 'maximumLength' in params else 16
         temperature = params['temperature'] if 'temperature' in params else 0.2
         stop_words = params['stopSequences'] if 'stopSequences' in params else None
-        response = post_http_request(inference_request.prompt, api_url, 1, True, max_tokens, temperature, stop_words)
+        response = post_http_request(prompt, api_url, 1, True, max_tokens, temperature, stop_words)
         logger.info(f"vllm infer url:{provider_details.infer_url} temperature:{temperature} max_tokens:{max_tokens} "
-                    f"stop_words: {stop_words} prompt: {inference_request.prompt}")
-        cancelled = False
+                    f"stop_words: {stop_words} prompt: {prompt}")
+
         pre_line = ""
+        if provider_details.cut:
+            pre_line = prompt
+        cancelled = False
         for output in get_streaming_response(response):
             for i, line in enumerate(output):
                 if cancelled:

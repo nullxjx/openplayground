@@ -345,6 +345,7 @@
     "models": {
       "codellama-7b": {
         "infer_url": "81.69.152.80:8003",
+        "cut": true,
         "capabilities": ["coding"],
         "enabled": true,
         "status": "ready",
@@ -385,6 +386,7 @@
       },
       "coding-wise": {
         "infer_url": "111.231.36.112:10086",
+        "cut": true,
         "capabilities": ["coding"],
         "enabled": true,
         "status": "ready",

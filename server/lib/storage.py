@@ -46,7 +46,8 @@ class Storage:
                     enabled=model.get("enabled", False),
                     status=model.get("status", "ready"),
                     parameters=model.get("parameters", {}),
-                    infer_url=model.get("infer_url", "")
+                    infer_url=model.get("infer_url", ""),
+                    cut=model.get("cut", False)
                 )
                 for model_name, model in provider['models'].items()
             ]
@@ -179,6 +180,16 @@ class Storage:
         return next(
             (
                 model.infer_url
+                for model in self.models
+                if model.name == model_name and model.provider == provider_name
+            ),
+            ""
+        )
+
+    def get_cut(self,  provider_name: str, model_name: str) -> str:
+        return next(
+            (
+                model.cut
                 for model in self.models
                 if model.name == model_name and model.provider == provider_name
             ),

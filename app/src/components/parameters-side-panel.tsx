@@ -30,6 +30,7 @@ const modelProviders = {
   anthropic: "Anthropic",
   cohere: "co:here",
   openai: "OpenAI",
+  vllm: "vllm"
 }
 
 const ParametersSidePanel = ({ showModelDropdown, showModelList }) => {

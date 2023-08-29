@@ -5,7 +5,7 @@ from .event_emitter import EventEmitter, EVENTS
 
 class Model:
     def __init__(self, name: str, enabled: bool, capabilities: List[str], provider: str, status: str,
-                 parameters: dict = None, infer_url: str = ""):
+                 parameters: dict = None, infer_url: str = "", cut: bool = False):
         self.name = name
         self.capabilities = capabilities
         self.enabled = enabled
@@ -13,6 +13,7 @@ class Model:
         self.status = status
         self.parameters = parameters
         self.infer_url = infer_url
+        self.cut = cut
 
     def copy(self):
         return Model(
@@ -22,11 +23,12 @@ class Model:
             provider=self.provider,
             status=self.status,
             parameters=self.parameters.copy(),
-            infer_url=self.infer_url
+            infer_url=self.infer_url,
+            cut=self.cut
         )
 
     def __repr__(self):
-        return f'Model({self.name}, {self.capabilities}, {self.enabled}, {self.provider}, {self.status}, {self.parameters}, {self.infer_url})'
+        return f'Model({self.name}, {self.capabilities}, {self.enabled}, {self.provider}, {self.status}, {self.parameters}, {self.infer_url}, {self.cut})'
 
 
 class ModelEncoder(json.JSONEncoder):

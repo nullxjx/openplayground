@@ -306,7 +306,8 @@ class GlobalStateManager:
         provider_details = ProviderDetails(
             api_key=provider.api_key,
             version_key=None,
-            infer_url=self.storage.get_infer_url(inference_request.model_provider, inference_request.model_name)
+            infer_url=self.storage.get_infer_url(inference_request.model_provider, inference_request.model_name),
+            cut=self.storage.get_cut(inference_request.model_provider, inference_request.model_name)
         )
         logger.info(f"Received inference request {inference_request.model_provider}")
 
