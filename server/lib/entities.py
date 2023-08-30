@@ -2,16 +2,18 @@ import json
 from typing import List
 from .event_emitter import EventEmitter, EVENTS
 
+
 class Model:
-    def __init__(
-        self, name: str, enabled: bool, capabilities: List[str],  provider: str, status: str, parameters: dict = None
-    ):
+    def __init__(self, name: str, enabled: bool, capabilities: List[str], provider: str, status: str,
+                 parameters: dict = None, infer_url: str = "", cut: bool = False):
         self.name = name
         self.capabilities = capabilities
         self.enabled = enabled
         self.provider = provider
         self.status = status
         self.parameters = parameters
+        self.infer_url = infer_url
+        self.cut = cut
 
     def copy(self):
         return Model(
@@ -20,11 +22,14 @@ class Model:
             enabled=self.enabled,
             provider=self.provider,
             status=self.status,
-            parameters=self.parameters.copy()
+            parameters=self.parameters.copy(),
+            infer_url=self.infer_url,
+            cut=self.cut
         )
 
     def __repr__(self):
-        return f'Model({self.name}, {self.capabilities}, {self.enabled}, {self.provider}, {self.status}, {self.parameters})'
+        return f'Model({self.name}, {self.capabilities}, {self.enabled}, {self.provider}, {self.status}, {self.parameters}, {self.infer_url}, {self.cut})'
+
 
 class ModelEncoder(json.JSONEncoder):
     def __init__(self, *args, serialize_as_list=True, **kwargs):
@@ -43,12 +48,13 @@ class ModelEncoder(json.JSONEncoder):
                 return {f"{obj.provider}:{obj.name}": properties}
         return super().default(obj)
 
+
 class Provider:
     def __init__(
-        self, name: str, models: List[Model], remote_inference: bool = False,
-        default_capabilities: List[str] = None, default_parameters: dict = None,
-        api_key: str = None, requires_api_key: bool = False,
-        search_url: str = None
+            self, name: str, models: List[Model], remote_inference: bool = False,
+            default_capabilities: List[str] = None, default_parameters: dict = None,
+            api_key: str = None, requires_api_key: bool = False,
+            search_url: str = None
     ):
         self.event_emitter = EventEmitter()
         self.name = name
@@ -59,22 +65,22 @@ class Provider:
         self.api_key = api_key
         self.requires_api_key = requires_api_key
         self.search_url = search_url
-    
+
     def has_model(self, model_name: str) -> bool:
         return any(model.name == model_name for model in self.models)
-    
+
     def get_model(self, model_name: str) -> Model:
         for model in self.models:
             if model.name == model_name:
                 return model
-            
+
     def update_model(self, model_name: str, model: Model) -> None:
         for i, m in enumerate(self.models):
             if m.name == model_name:
                 self.models[i] = model
                 self.event_emitter.emit(EVENTS.MODEL_UPDATED, model)
                 return
-    
+
     def add_model(self, model: Model) -> None:
         self.models.append(model)
         print("Added model!")
@@ -86,7 +92,7 @@ class Provider:
                 self.models.remove(model)
                 self.event_emitter.emit(EVENTS.MODEL_REMOVED, model)
                 return
-            
+
     def copy(self):
         return Provider(
             name=self.name,
@@ -98,9 +104,10 @@ class Provider:
             requires_api_key=self.requires_api_key,
             search_url=self.search_url
         )
-    
+
     def __repr__(self):
         return f'Provider({self.name}, {self.models}, {self.remote_inference}, {self.default_parameters}, {self.api_key}, {self.requires_api_key}, {self.search_url})'
+
 
 class ProviderEncoder(json.JSONEncoder):
     def __init__(self, *args, serialize_models_as_list=True, **kwargs):
@@ -114,13 +121,14 @@ class ProviderEncoder(json.JSONEncoder):
                 "enabled": model.enabled, "provider": model.provider,
                 "status": model.status, "parameters": model.parameters
             } for model in obj.models]
-            
+
             if not self.serialize_models_as_list:
                 models = dict(zip([model["name"] for model in models], models))
-        
-            return {self.to_camel_case(k): v for k, v in obj.__dict__.items() if k not in {'models', 'event_emitter'}} | {'models': models}
+
+            return {self.to_camel_case(k): v for k, v in obj.__dict__.items() if
+                    k not in {'models', 'event_emitter'}} | {'models': models}
         return super().default(obj)
-    
+
     @staticmethod
     def to_camel_case(snake_str):
         components = snake_str.split('_')

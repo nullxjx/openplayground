@@ -26,9 +26,11 @@ from flask_cors import CORS
 from transformers import AutoTokenizer, AutoModel
 from huggingface_hub import hf_hub_download, try_to_load_from_cache, scan_cache_dir, _CACHED_NO_EXIST
 
+
 # Monkey patching for warnings, for convenience
 def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
     return '%s:%s: %s: %s\n' % (filename, lineno, category.__name__, message)
+
 
 warnings.formatwarning = warning_on_one_line
 
@@ -36,6 +38,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 app = Flask(__name__)
+
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
@@ -45,19 +48,23 @@ def serve(path):
 
     return send_from_directory(app.static_folder, path)
 
+
 @app.errorhandler(404)
 def page_not_found(i):
     path = 'index.html'
     return send_from_directory(app.static_folder, path)
+
 
 @app.before_request
 def before_request():
     g.global_state = app.config['GLOBAL_STATE']
     g.storage = g.global_state.get_storage()
 
+
 app.register_blueprint(api_bp)
 
 CORS(app)
+
 
 class RedirectStderr:
     def __init__(self, new_stderr):
@@ -71,10 +78,12 @@ class RedirectStderr:
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.stderr = self.old_stderr
 
+
 @contextmanager
 def redirect_stderr(new_stderr):
     with RedirectStderr(new_stderr):
         yield
+
 
 class MonitorThread(threading.Thread):
     def __init__(self, model, output_buffer):
@@ -91,7 +100,7 @@ class MonitorThread(threading.Thread):
             current_shard = 0
             total_shards = 0
             last_line = 0
-   
+
             while not self._stop_event.is_set():
                 try:
                     lines = output_buffer.getvalue().splitlines()[last_line:]
@@ -134,13 +143,14 @@ class MonitorThread(threading.Thread):
     def stop(self):
         self._stop_event.set()
 
+
 class NotificationManager:
     def __init__(self, sse_queue: SSEQueueWithTopic):
         self.event_emitter = EventEmitter()
         self.event_emitter.on(EVENTS.MODEL_UPDATED, self.__model_updated_callback__)
         self.event_emitter.on(EVENTS.MODEL_ADDED, self.__model_added_callback__)
-        #TODO Fix the bug where SSE gets blocked
-        #self.event_emitter.on(EVENTS.MODEL_DOWNLOAD_UPDATE, self.__model_download_update_callback__)
+        # TODO Fix the bug where SSE gets blocked
+        # self.event_emitter.on(EVENTS.MODEL_DOWNLOAD_UPDATE, self.__model_download_update_callback__)
         self.sse_queue = sse_queue
 
     def __model_added_callback__(self, model_name, model):
@@ -188,6 +198,7 @@ class NotificationManager:
             }
         }))
 
+
 ### Perhaps this should be a singleton or each provider should have its own instance
 ### For now this will only deal with HuggingFace
 class DownloadManager:
@@ -210,7 +221,7 @@ class DownloadManager:
         # TODO: In the future it might make sense to have local provider specific instances
         cache_info = scan_cache_dir()
         hugging_face_local = self.storage.get_provider("huggingface-local")
- 
+
         for repo_info in cache_info.repos:
             repo_id = repo_info.repo_id
             repo_type = repo_info.repo_type
@@ -236,7 +247,7 @@ class DownloadManager:
     def __model_added_callback__(self, model_name, model):
         if model.status == 'pending':
             self.model_queue.put(model)
-     
+
     def __download_loop__(self):
         while True:
             try:
@@ -244,7 +255,7 @@ class DownloadManager:
                 with redirect_stderr(output_buffer):
                     model = self.model_queue.get(block=False)
 
-                    monitor_thread =  MonitorThread(model, output_buffer)
+                    monitor_thread = MonitorThread(model, output_buffer)
                     monitor_thread.start()
 
                     logger.info("Inside loop, about to download model", model.name)
@@ -258,7 +269,7 @@ class DownloadManager:
 
                     monitor_thread.stop()
                     monitor_thread.join()
-                    
+
                     logger.info("Finished downloading model", model.name)
             except queue.Empty:
                 time.sleep(1)
@@ -267,6 +278,7 @@ class DownloadManager:
                 logger.error(f"Failed to download {model.name} from {model.provider}")
             finally:
                 time.sleep(1)
+
 
 class GlobalStateManager:
     def __init__(self, storage):
@@ -284,7 +296,7 @@ class GlobalStateManager:
 
     def get_storage(self):
         return self.storage
-    
+
     def get_sse_manager(self):
         return self.sse_manager
 
@@ -292,8 +304,10 @@ class GlobalStateManager:
         provider = self.storage.get_provider(inference_request.model_provider)
 
         provider_details = ProviderDetails(
-            api_key=provider.api_key ,
-            version_key=None
+            api_key=provider.api_key,
+            version_key=None,
+            infer_url=self.storage.get_infer_url(inference_request.model_provider, inference_request.model_name),
+            cut=self.storage.get_cut(inference_request.model_provider, inference_request.model_name)
         )
         logger.info(f"Received inference request {inference_request.model_provider}")
 
@@ -311,26 +325,33 @@ class GlobalStateManager:
             return self.inference_manager.anthropic_text_generation(provider_details, inference_request)
         elif inference_request.model_provider == "aleph-alpha":
             return self.inference_manager.aleph_alpha_text_generation(provider_details, inference_request)
+        elif inference_request.model_provider == "vllm":
+            return self.inference_manager.vllm_text_generation(provider_details, inference_request)
         else:
             raise Exception(
-                f"Unknown model provider, {inference_request.model_provider}. Please add a generation function in InferenceManager or route in ModelManager.text_generation"
+                f"Unknown model provider, {inference_request.model_provider}. Please add a generation function in "
+                f"InferenceManager or route in ModelManager.text_generation"
             )
-    
+
     def get_announcer(self):
         return self.inference_manager.get_announcer()
+
 
 @click.group()
 def cli():
     pass
 
+
 @click.command()
 @click.help_option('-h', '--help')
-@click.option('--host',  '-H', default='localhost', help='The host to bind to. Default: localhost.')
+@click.option('--host', '-H', default='localhost', help='The host to bind to. Default: localhost.')
 @click.option('--port', '-p', default=5432, help='The port to bind to. Default: 5432.')
 @click.option('--debug/--no-debug', default=False, help='Enable or disable Flask debug mode. Default: False.')
-@click.option('--env', '-e', default=".env", help='Path to the environment file for storing and reading API keys. Default: .env.')
+@click.option('--env', '-e', default=".env",
+              help='Path to the environment file for storing and reading API keys. Default: .env.')
 @click.option('--models', '-m', default=None, help='Path to the configuration file for loading models. Default: None.')
-@click.option('--log-level', '-l', default='INFO', help='Set the logging level. Default: INFO.', type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']))
+@click.option('--log-level', '-l', default='INFO', help='Set the logging level. Default: INFO.',
+              type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']))
 def run(host, port, debug, env, models, log_level):
     """
     Run the OpenPlayground server.
@@ -355,6 +376,7 @@ def run(host, port, debug, env, models, log_level):
 
     app.run(host=host, port=port, debug=debug)
 
+
 @click.command()
 @click.help_option('-h', '--help')
 @click.option('--input', '-i', default=None, help='Path to the configuration file for importing models')
@@ -372,6 +394,7 @@ def import_config(input):
     $ openplayground import-config --input=/path/to/config.json
     """
     Storage.import_config(input)
+
 
 @click.command()
 @click.help_option('-h', '--help')
@@ -392,12 +415,13 @@ def export_config(ctx, output):
     """
     Storage.export_config(output)
 
+
 cli.add_command(export_config)
 cli.add_command(import_config)
 cli.add_command(run)
 
 if __name__ == '__main__':
-    app.static_folder='../app/dist'
+    app.static_folder = '../app/dist'
     run()
 else:
-    app.static_folder='./static'
+    app.static_folder = './static'
