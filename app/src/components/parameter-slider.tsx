@@ -110,10 +110,11 @@ const ParamaterSlider: React.FC<ParameterSliderProps> = ({
               step={step}
               onValueChange={(e) => {
                 setValue(e[0])
-              }}
-              onValueCommit={(e) => {
                 if (onChangeValue) onChangeValue(e[0])
               }}
+//               onValueCommit={(e) => {
+//                 if (onChangeValue) onChangeValue(e[0])
+//               }}
             />
           </div>
         </TooltipTrigger>
