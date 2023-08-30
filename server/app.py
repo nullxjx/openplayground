@@ -327,6 +327,8 @@ class GlobalStateManager:
             return self.inference_manager.aleph_alpha_text_generation(provider_details, inference_request)
         elif inference_request.model_provider == "vllm":
             return self.inference_manager.vllm_text_generation(provider_details, inference_request)
+        elif inference_request.model_provider == "triton":
+            return self.inference_manager.triton_text_generation(provider_details, inference_request)
         else:
             raise Exception(
                 f"Unknown model provider, {inference_request.model_provider}. Please add a generation function in "
