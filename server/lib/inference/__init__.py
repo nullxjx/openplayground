@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from typing import Callable, Union
 from .huggingface.hf import HFInference
 from .vllm.vllm_client import post_http_request, get_streaming_response, get_new_part
-from .triton.llama import infer
+from .triton.llama.llama import infer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -728,7 +728,7 @@ class InferenceManager:
         pre_line = ""
         if provider_details.cut:
             pre_line = prompt
-        line = infer(infer_url, prompt, model)
+        line = infer(infer_url, prompt, model)[0]  # beam_width暂时写死为1，每次只返回一条结果
         infer_response = InferenceResult(
             uuid=inference_request.uuid,
             model_name=inference_request.model_name,

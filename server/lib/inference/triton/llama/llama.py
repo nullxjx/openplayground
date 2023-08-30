@@ -1,10 +1,14 @@
 import numpy as np
 from transformers import AutoTokenizer
-from .common import prepare_tensor
-from .common import create_inference_server_client
+from server.lib.inference.triton.common import prepare_tensor
+from server.lib.inference.triton.common import create_inference_server_client
+import os
 
-
-tokenizer = AutoTokenizer.from_pretrained("./tokenizers/llama")
+# 获取llama.py文件所在的目录
+base_dir = os.path.dirname(os.path.abspath(__file__))
+tokenizer_path = os.path.join(base_dir, "tokenizer")
+# print("llama tokenizer_path: {}".format(tokenizer_path))
+tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
 
 
 def prepare_final_inputs(prompt, protocol, batch_size=1, start_id=1, end_id=2, topK=1, topP=0, return_log_probs=False,
@@ -58,11 +62,20 @@ def prepare_final_inputs(prompt, protocol, batch_size=1, start_id=1, end_id=2, t
     ]
 
 
-def infer(infer_url, prompt, model, topK=1, topP=0, return_log_probs=False, beamWidth=1):
+def infer(infer_url, prompt, model, topK=1, topP=0, beam_width=1):
     protocol = "http"
     with create_inference_server_client(protocol, infer_url, concurrency=1, verbose=False) as client:
         try:
-            inputs = prepare_final_inputs(prompt, protocol)
+            inputs = prepare_final_inputs(prompt, protocol, beamWidth=beam_width, topK=topK, topP=topP)
             result = client.infer(model, inputs)
+            output0 = result.as_numpy("output_ids")
+            result_text = []
+            for j in range(beam_width):
+                result_len = (output0[0][j] != 0).sum()
+                result_tokens = output0[0][j][:result_len]
+                text = tokenizer.decode(result_tokens.tolist())
+                result_text.append(text)
+            return result_text
         except Exception as e:
             print(e)
+    return []

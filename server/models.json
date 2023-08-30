@@ -429,8 +429,8 @@
   },
   "triton": {
     "models": {
-      "coding-wise": {
-        "infer_url": "1.117.136.203:10086",
+      "fastertransformer": {
+        "infer_url": "81.69.166.17:8001",
         "cut": true,
         "capabilities": ["coding"],
         "enabled": true,
