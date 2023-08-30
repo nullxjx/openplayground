@@ -11,18 +11,17 @@ from typing import List, Dict, Any
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# config_dir = os.environ.get('XDG_CONFIG_HOME')
-# if not config_dir:
-#     if os.name == 'nt':  # Windows
-#         config_dir = os.environ.get('APPDATA')
-#     else:  # Linux/Unix
-#         config_dir = os.path.expanduser('~/.config')
-#
-# APP_DIR = os.path.join(config_dir, 'openplayground')
-# os.makedirs(APP_DIR, exist_ok=True)
+config_dir = os.environ.get('XDG_CONFIG_HOME')
+if not config_dir:
+    if os.name == 'nt':  # Windows
+        config_dir = os.environ.get('APPDATA')
+    else:  # Linux/Unix
+        config_dir = os.path.expanduser('~/.config')
 
-APP_DIR = os.getcwd()
+APP_DIR = os.path.join(config_dir, 'openplayground')
+os.makedirs(APP_DIR, exist_ok=True)
 
+# APP_DIR = os.getcwd()
 
 class Storage:
     def __init__(self, models_json_path: str = None, env_file_path: str = None):
