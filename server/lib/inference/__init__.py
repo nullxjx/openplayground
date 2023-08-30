@@ -723,28 +723,22 @@ class InferenceManager:
 
     def __triton_text_generation__(self, provider_details: ProviderDetails, inference_request: InferenceRequest):
         prompt = inference_request.prompt
+        model = inference_request.model_name
+        infer_url = provider_details.infer_url
         pre_line = ""
         if provider_details.cut:
             pre_line = prompt
-        cancelled = False
-        for output in get_streaming_response(response):
-            for i, line in enumerate(output):
-                if cancelled:
-                    break
-                infer_response = InferenceResult(
-                    uuid=inference_request.uuid,
-                    model_name=inference_request.model_name,
-                    model_tag=inference_request.model_tag,
-                    model_provider=inference_request.model_provider,
-                    token=get_new_part(pre_line, line),
-                    probability=None,
-                    top_n_distribution=None
-                )
-                pre_line = line
-                if not self.announcer.announce(infer_response, event="infer"):
-                    cancelled = True
-                    logger.info(
-                        f"Cancelled inference for {inference_request.uuid} - {inference_request.model_name}")
+        line = infer(infer_url, prompt, model)
+        infer_response = InferenceResult(
+            uuid=inference_request.uuid,
+            model_name=inference_request.model_name,
+            model_tag=inference_request.model_tag,
+            model_provider=inference_request.model_provider,
+            token=get_new_part(pre_line, line),
+            probability=None,
+            top_n_distribution=None
+        )
+        self.announcer.announce(infer_response, event="infer")
 
     def triton_text_generation(self, provider_details: ProviderDetails, inference_request: InferenceRequest):
         self.__error_handler__(self.__triton_text_generation__, provider_details, inference_request)
