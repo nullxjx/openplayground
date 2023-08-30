@@ -681,7 +681,7 @@ class InferenceManager:
         stop_words = params['stopSequences'] if 'stopSequences' in params else None
         response = post_http_request(prompt, api_url, 1, True, max_tokens, temperature, stop_words)
         logger.info(f"vllm infer url:{provider_details.infer_url} temperature:{temperature} max_tokens:{max_tokens} "
-                    f"stop_words: {stop_words} prompt: {prompt}")
+                    f"stop_words: {stop_words}")
 
         pre_line = ""
         if provider_details.cut:

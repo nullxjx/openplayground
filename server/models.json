@@ -385,7 +385,7 @@
         }
       },
       "coding-wise": {
-        "infer_url": "111.231.36.112:10086",
+        "infer_url": "1.117.136.203:10086",
         "cut": true,
         "capabilities": ["coding"],
         "enabled": true,
