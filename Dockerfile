@@ -26,20 +26,15 @@ ENV XDG_CONFIG_HOME=/web/config
 
 ARG POETRY_VERSION=1.4.1
 
-RUN pip install --no-cache-dir --upgrade pip
+RUN apt-get update && apt-get install -y python3-dev libevent-dev build-essential
 
-# install poetry
-RUN pip install poetry==${POETRY_VERSION}
-RUN poetry config virtualenvs.create false
+RUN pip install --no-cache-dir --upgrade pip
 
 COPY server/ ./server/
 COPY README.md .
 COPY --from=builder /frontend/dist ./server/static/
 
 # install python dependencies
-RUN #poetry import ./server/requirements.txt
-COPY pyproject.toml .
-COPY poetry.lock .
-RUN poetry install --without=dev --no-interaction --no-ansi
+RUN pip install -r ./server/requirements.txt
 
 ENTRYPOINT ["openplayground", "run", "--host", "0.0.0.0", "--env", "/web/config/.env"]
