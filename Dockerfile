@@ -37,6 +37,7 @@ COPY README.md .
 COPY --from=builder /frontend/dist ./server/static/
 
 # install python dependencies
+RUN #poetry import ./server/requirements.txt
 COPY pyproject.toml .
 COPY poetry.lock .
 RUN poetry install --without=dev --no-interaction --no-ansi
