@@ -15,7 +15,7 @@ COPY app/* ./
 RUN npx parcel build src/index.html --no-cache --no-source-maps
 
 # ==== BACKEND ====
-FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime
+FROM thexjx/openplayground
 
 WORKDIR /web/
 
@@ -23,10 +23,6 @@ WORKDIR /web/
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV XDG_CONFIG_HOME=/web/config
-
-ARG POETRY_VERSION=1.4.1
-
-RUN apt-get update && apt-get install -y python3-dev libevent-dev build-essential
 
 RUN pip install --no-cache-dir --upgrade pip
 
@@ -37,4 +33,4 @@ COPY --from=builder /frontend/dist ./server/static/
 # install python dependencies
 RUN pip install -r ./server/requirements.txt
 
-ENTRYPOINT ["python3 -m server.app", "--host", "0.0.0.0", "--env", "/web/config/.env"]
+ENTRYPOINT ["python3", "-m", "server.app", "--host", "0.0.0.0", "--env", "/web/config/.env"]

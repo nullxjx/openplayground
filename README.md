@@ -26,7 +26,7 @@ openplayground run
 
 Alternatively, run it as a docker container:
 ```sh
-docker run -p 5432:5432 -d --volume openplayground:/web/config natorg/openplayground
+docker run -p 5432:5432 -it --volume openplayground:/web/config natorg/openplayground
 ```
 
 This runs a Flask process, so you can add the typical flags such as setting a different port `openplayground run -p 1235` and others.
@@ -47,6 +47,11 @@ docker run --name openplayground -p 5432:5432 -d --volume openplayground:/web/co
 ```
 
 First volume is optional. It's used to store API keys, models settings.
+
+## k8s
+```bash
+k --kubeconfig ~/Desktop/tke-triton.yaml -n jasinxie apply -f run_in_k8s.yaml
+```
 
 ## Ideas for contributions
 

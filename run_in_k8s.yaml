@@ -1,0 +1,534 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openplayground-image-credentials
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: ""
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: "eyJhdXRocyI6IHsiY3MtYWkudGVuY2VudGNsb3VkY3IuY29tIjogeyJhdXRoIjogImRHTnlKR056TFdGcE9uRmxVWEpyWW5kRllsUnNTVlJaVG5Kck5IZ3lhVzlQTjA1VGEyZEhWMDlNIn19fQ=="
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: models-config
+data:
+  models.json: |
+    {
+      "openai": {
+        "requiresAPIKey": true,
+        "remoteInference": true,
+        "models": {
+          "text-ada-001": {
+            "enabled": false,
+            "status": "ready",
+            "capabilities": [
+              "logprobs"
+            ],
+            "parameters": {
+              "temperature": {
+                "value": 0.5,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "maximumLength": {
+                "value": 200,
+                "range": [
+                  50,
+                  2048
+                ]
+              },
+              "topP": {
+                "value": 1,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "presencePenalty": {
+                "value": 0,
+                "range": [
+                  0,
+                  1
+                ]
+              },
+              "frequencyPenalty": {
+                "value": 0,
+                "range": [
+                  0,
+                  1
+                ]
+              },
+              "stopSequences": {
+                "value": [],
+                "range": []
+              }
+            }
+          },
+          "text-babbage-001": {
+            "enabled": false,
+            "status": "ready",
+            "capabilities": [
+              "logprobs"
+            ],
+            "parameters": {
+              "temperature": {
+                "value": 0.5,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "maximumLength": {
+                "value": 200,
+                "range": [
+                  50,
+                  2048
+                ]
+              },
+              "topP": {
+                "value": 1,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "presencePenalty": {
+                "value": 0,
+                "range": [
+                  0,
+                  1
+                ]
+              },
+              "frequencyPenalty": {
+                "value": 0,
+                "range": [
+                  0,
+                  1
+                ]
+              },
+              "stopSequences": {
+                "value": [],
+                "range": []
+              }
+            }
+          },
+          "text-curie-001": {
+            "enabled": false,
+            "status": "ready",
+            "capabilities": [
+              "logprobs"
+            ],
+            "parameters": {
+              "temperature": {
+                "value": 0.5,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "maximumLength": {
+                "value": 200,
+                "range": [
+                  50,
+                  2048
+                ]
+              },
+              "topP": {
+                "value": 1,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "presencePenalty": {
+                "value": 0,
+                "range": [
+                  0,
+                  1
+                ]
+              },
+              "frequencyPenalty": {
+                "value": 0,
+                "range": [
+                  0,
+                  1
+                ]
+              },
+              "stopSequences": {
+                "value": [],
+                "range": []
+              }
+            }
+          },
+          "text-davinci-003": {
+            "enabled": false,
+            "status": "ready",
+            "capabilities": [
+              "logprobs"
+            ],
+            "parameters": {
+              "temperature": {
+                "value": 0.5,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "maximumLength": {
+                "value": 200,
+                "range": [
+                  50,
+                  4000
+                ]
+              },
+              "topP": {
+                "value": 1,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "presencePenalty": {
+                "value": 0,
+                "range": [
+                  0,
+                  1
+                ]
+              },
+              "frequencyPenalty": {
+                "value": 0,
+                "range": [
+                  0,
+                  1
+                ]
+              },
+              "stopSequences": {
+                "value": [],
+                "range": []
+              }
+            }
+          },
+          "gpt-3.5-turbo": {
+            "enabled": false,
+            "status": "ready",
+            "capabilities": [
+              "logprobs"
+            ],
+            "parameters": {
+              "temperature": {
+                "value": 0.5,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "maximumLength": {
+                "value": 200,
+                "range": [
+                  50,
+                  4097
+                ]
+              },
+              "topP": {
+                "value": 1,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "presencePenalty": {
+                "value": 0,
+                "range": [
+                  0,
+                  1
+                ]
+              },
+              "frequencyPenalty": {
+                "value": 0,
+                "range": [
+                  0,
+                  1
+                ]
+              },
+              "stopSequences": {
+                "value": [],
+                "range": []
+              }
+            }
+          },
+          "gpt-4": {
+            "enabled": false,
+            "status": "ready",
+            "capabilities": [
+              "logprobs"
+            ],
+            "parameters": {
+              "temperature": {
+                "value": 0.5,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "maximumLength": {
+                "value": 200,
+                "range": [
+                  50,
+                  8192
+                ]
+              },
+              "topP": {
+                "value": 1,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "presencePenalty": {
+                "value": 0,
+                "range": [
+                  0,
+                  1
+                ]
+              },
+              "frequencyPenalty": {
+                "value": 0,
+                "range": [
+                  0,
+                  1
+                ]
+              },
+              "stopSequences": {
+                "value": [],
+                "range": []
+              }
+            }
+          }
+        }
+      },
+      "huggingface": {
+        "requiresAPIKey": true,
+        "remoteInference": true,
+        "searchURL": "https://huggingface.co/api/quicksearch?q={searchQuery}&type=model",
+        "defaultCapabilities": [],
+        "defaultParameters": {
+          "temperature": {
+            "value": 1,
+            "range": [
+              0.1,
+              1
+            ]
+          },
+          "maximumLength": {
+            "value": 200,
+            "range": [
+              50,
+              1024
+            ]
+          },
+          "topP": {
+            "value": 0.99,
+            "range": [
+              0.01,
+              0.99
+            ]
+          },
+          "topK": {
+            "value": 1,
+            "range": [
+              1,
+              500
+            ]
+          },
+          "repetitionPenalty": {
+            "value": 1,
+            "range": [
+              0.1,
+              2
+            ]
+          },
+          "stopSequences": {
+            "value": [],
+            "range": []
+          }
+        },
+        "models": {}
+      },
+      "vllm": {
+        "models": {
+          "codellama-7b": {
+            "infer_url": "81.69.152.80:8003",
+            "cut": true,
+            "capabilities": ["coding"],
+            "enabled": true,
+            "status": "ready",
+            "parameters": {
+              "temperature": {
+                "value": 1,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "maximumLength": {
+                "value": 200,
+                "range": [
+                  16,
+                  1024
+                ]
+              },
+              "topP": {
+                "value": 1,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "repetitionPenalty": {
+                "value": 1,
+                "range": [
+                  0,
+                  2
+                ]
+              },
+              "stopSequences": {
+                "value": [],
+                "range": []
+              }
+            }
+          },
+          "coding-wise": {
+            "infer_url": "1.117.136.203:10086",
+            "cut": true,
+            "capabilities": ["coding"],
+            "enabled": true,
+            "status": "ready",
+            "parameters": {
+              "temperature": {
+                "value": 1,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "maximumLength": {
+                "value": 200,
+                "range": [
+                  16,
+                  1024
+                ]
+              },
+              "topP": {
+                "value": 1,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "repetitionPenalty": {
+                "value": 1,
+                "range": [
+                  0,
+                  2
+                ]
+              },
+              "stopSequences": {
+                "value": [],
+                "range": []
+              }
+            }
+          }
+        }
+      },
+      "triton": {
+        "models": {
+          "fastertransformer": {
+            "infer_url": "81.69.166.17:8001",
+            "cut": true,
+            "capabilities": ["coding"],
+            "enabled": true,
+            "status": "ready",
+            "parameters": {
+              "temperature": {
+                "value": 1,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "maximumLength": {
+                "value": 200,
+                "range": [
+                  16,
+                  1024
+                ]
+              },
+              "topP": {
+                "value": 1,
+                "range": [
+                  0.1,
+                  1
+                ]
+              },
+              "repetitionPenalty": {
+                "value": 1,
+                "range": [
+                  0,
+                  2
+                ]
+              },
+              "stopSequences": {
+                "value": [],
+                "range": []
+              }
+            }
+          }
+        }
+      }
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openplayground-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openplayground
+  template:
+    metadata:
+      labels:
+        app: openplayground
+    spec:
+      imagePullSecrets:
+        - name: openplayground-image-credentials
+      containers:
+      - name: openplayground-container
+        image: cs-ai.tencentcloudcr.com/triton/openplayground-amd64:10ce0f299d36057dbcb2b005679eb1fa80e7fd80
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+          - name: models-config-volume
+            mountPath: /web/config
+      volumes:
+        - name: models-config-volume
+          configMap:
+            name: models-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openplayground-service
+spec:
+  selector:
+    app: openplayground
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  type: LoadBalancer
