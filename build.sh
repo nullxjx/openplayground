@@ -3,7 +3,7 @@ registry="cs-ai.tencentcloudcr.com"
 #registry="docker.io"
 #repository="thexjx/traefik-with-plugins"
 tag="${commit_id}"
-platform="arm64" # arm64 or amd64
+platform="amd64" # arm64 or amd64
 
 function build() {
     repository="triton/openplayground-${platform}"

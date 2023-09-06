@@ -27,7 +27,6 @@ ENV XDG_CONFIG_HOME=/web/config
 RUN pip install --no-cache-dir --upgrade pip
 
 COPY server/ ./server/
-COPY README.md .
 COPY --from=builder /frontend/dist ./server/static/
 
 # install python dependencies

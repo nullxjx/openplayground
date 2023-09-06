@@ -422,8 +422,7 @@ cli.add_command(export_config)
 cli.add_command(import_config)
 cli.add_command(run)
 
+app.static_folder = '/web/server/static' if os.path.exists('/web/server/static') else '../app/dist'
 if __name__ == '__main__':
-    app.static_folder = '../app/dist'
+    print("app static path: {}".format(os.path.normpath(app.static_folder)))
     run()
-else:
-    app.static_folder = './static'
