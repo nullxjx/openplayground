@@ -509,7 +509,7 @@ spec:
         - name: openplayground-image-credentials
       containers:
       - name: openplayground-container
-        image: cs-ai.tencentcloudcr.com/triton/openplayground-amd64:7df6dc9e0cd464daf4fa00bb60a080c318ea1f55
+        image: cs-ai.tencentcloudcr.com/triton/openplayground-amd64:88e1d9bda00718c1cc0fd2fe8254a4cb13df14c1
         ports:
         - containerPort: 5432
         volumeMounts:
