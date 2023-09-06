@@ -10,7 +10,7 @@ function build() {
     image_name="${registry}/${repository}:${tag}"
     echo image_name: "${image_name}"
     docker build --no-cache --platform linux/${platform} -t "${image_name}" -f Dockerfile .
-    docker push "${image_name}"
+#    docker push "${image_name}"
 }
 
 

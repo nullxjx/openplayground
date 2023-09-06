@@ -37,4 +37,4 @@ COPY --from=builder /frontend/dist ./server/static/
 # install python dependencies
 RUN pip install -r ./server/requirements.txt
 
-ENTRYPOINT ["openplayground", "run", "--host", "0.0.0.0", "--env", "/web/config/.env"]
+ENTRYPOINT ["python3 -m server.app", "--host", "0.0.0.0", "--env", "/web/config/.env"]

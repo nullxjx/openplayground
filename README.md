@@ -26,7 +26,7 @@ openplayground run
 
 Alternatively, run it as a docker container:
 ```sh
-docker run --name openplayground -p 5432:5432 -d --volume openplayground:/web/config natorg/openplayground
+docker run -p 5432:5432 -d --volume openplayground:/web/config natorg/openplayground
 ```
 
 This runs a Flask process, so you can add the typical flags such as setting a different port `openplayground run -p 1235` and others.
