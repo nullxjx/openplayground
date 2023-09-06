@@ -611,7 +611,8 @@ const PromptCompletionEditor = ({showDialog}) => {
       for(const output_entry of output) {
         const currentContent = current_editor_state.getCurrentContent()
         const blockMap = currentContent.getBlockMap()
-        const key = blockMap.last().getKey()
+//         const key = blockMap.last().getKey()
+        const key = typeof blockMap.last().getKey === 'function' ? blockMap.last().getKey() : blockMap.last().getKey
         const length = blockMap.last().getLength()
         const selection = new SelectionState({
           anchorKey: key,

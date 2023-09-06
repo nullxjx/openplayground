@@ -294,7 +294,8 @@ const ModelCard = forwardRef((props, ref) => {
         aggregate_new_chars += output_entry.message.split("").length
         const currentContent = current_editor_state.getCurrentContent()
         const blockMap = currentContent.getBlockMap()
-        const key = blockMap.last().getKey()
+//         const key = blockMap.last().getKey()
+        const key = typeof blockMap.last().getKey === 'function' ? blockMap.last().getKey() : blockMap.last().getKey
         const length = blockMap.last().getLength()
         const selection = new SelectionState({
           anchorKey: key,
